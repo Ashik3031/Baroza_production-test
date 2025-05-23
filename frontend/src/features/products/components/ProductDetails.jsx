@@ -61,7 +61,7 @@ import SizeChartModal from "../../../constants/SizeChartModal";
 import ImageSlider from "../../../components/ImageSlider";
 
 const SIZES = ["XS", "S", "M", "L", "XL"];
-const COLORS = ["#020202", "#F6F6F6", "#B82222", "#BEA9A9", "#E2BB8D"];
+// const COLORS = ["#020202", "#F6F6F6", "#B82222", "#BEA9A9", "#E2BB8D"];
 
 export const ProductDetails = () => {
   const navigate = useNavigate();
@@ -163,6 +163,10 @@ export const ProductDetails = () => {
     }
   }, [reviewFetchStatus]);
 
+  //lunu
+  const allOutOfStock = Object.values(product?.stockQuantity || {}).every(qty => qty === 0);
+
+
   useEffect(() => {
     return () => {
       dispatch(clearSelectedProduct());
@@ -238,6 +242,11 @@ export const ProductDetails = () => {
       dispatch(deleteWishlistItemByIdAsync(wishlistItems[index]._id));
     }
   };
+
+  const totalStock = Object.values(product?.stockQuantity || {}).reduce(
+  (acc, qty) => acc + qty,
+  0
+);
 
   return (
     <>
@@ -368,18 +377,19 @@ export const ProductDetails = () => {
                       </Typography>
                       <Typography
                         color={
-                          product?.stockQuantity <= 10
+                          totalStock<= 10
                             ? "error"
-                            : product?.stockQuantity <= 20
+                            : totalStock <= 20
                             ? "orange"
                             : "green"
                         }
                       >
-                        {product?.stockQuantity <= 10
-                          ? `Only ${product?.stockQuantity} left`
-                          : product?.stockQuantity <= 20
-                          ? "Only few left"
-                          : "In Stock"}
+                       {totalStock === 0 ? "Out of Stock" :
+                       totalStock <= 10
+  ? `Only ${totalStock} left`
+  : totalStock <= 20
+  ? "Only few left"
+  : "In Stock"}
                       </Typography>
                     </Stack>
 
@@ -539,32 +549,35 @@ export const ProductDetails = () => {
                             In Cart
                           </button>
                         ) : (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 1 }}
-                            onClick={handleAddToCart}
-                            style={{
-                              padding: "10px 15px",
-                              fontSize: "1.050rem",
-                              backgroundColor: "black",
-                              color: "white",
-                              outline: "none",
-                              border: "none",
-                              borderRadius: "8px",
-                            }}
-                            disabled={
-                              !selectedSize ||
-                              (selectedSize &&
-                                product?.stockQuantity[selectedSize] <= 0)
-                            }
-                          >
-                            {selectedSize
-                              ? product?.stockQuantity[selectedSize] &&
-                                product?.stockQuantity[selectedSize] > 0
-                                ? "Add to Cart"
-                                : "Out of Stock"
-                              : "Select Size"}
-                          </motion.button>
+                        <motion.button
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 1 }}
+  onClick={handleAddToCart}
+  style={{
+    padding: is387 ? "8px 12px" : "10px 15px",
+    fontSize: "1.050rem",
+    backgroundColor: "black",
+    color: "white",
+    outline: "none",
+    border: "none",
+    borderRadius: "8px",
+    flex: is480 ? "1 1 auto" : "0 1 auto",
+  }}
+  disabled={
+    allOutOfStock ||
+    !selectedSize ||
+    (selectedSize && product?.stockQuantity[selectedSize] <= 0)
+  }
+>
+  {allOutOfStock
+    ? "Out of Stock"
+    : !selectedSize
+    ? "Select Size"
+    : product?.stockQuantity?.[selectedSize] <= 0
+    ? "Out of Stock"
+    : "Add to Cart"}
+</motion.button>
+
                         )}
 
                         {/* wishlist */}

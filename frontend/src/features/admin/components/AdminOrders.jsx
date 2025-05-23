@@ -163,6 +163,10 @@ export const AdminOrders = () => {
                             <Typography variant="body2" color="text.secondary">
                               Size: {product?.size}
                             </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Quantity: {product?.quantity}
+                            </Typography>
+                          
                           </Stack>
                         ))}
                       </TableCell>
