@@ -17,7 +17,7 @@ const checkoutRoutes = require("./routes/Checkout");
 const { connectToDB } = require("./database/db");
 const bodyParser = require('body-parser');
 const { handleStripeWebhook } = require("./controllers/Checkout");
-
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
 // server init
 const server = express();
 
@@ -26,20 +26,18 @@ connectToDB();
 
 // CORS Configuration
 server.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');  
-
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) { 
-            callback(null, true);  
-        } else {
-            callback(new Error('Not allowed by CORS'));  
-        }
-    },
-    credentials: true,
-    exposedHeaders: ['X-Total-Count'],
-    methods: ['GET', 'POST', 'PATCH', 'DELETE']
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error("Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  exposedHeaders: ['X-Total-Count'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
-
 server.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleStripeWebhook);
 
 // middlewares
